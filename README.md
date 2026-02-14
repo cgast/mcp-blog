@@ -83,8 +83,24 @@ The body of the post goes here. Full **markdown** support.
 | `BLOG_TITLE` | `MCP Blog` | Blog name shown in header |
 | `BLOG_DESCRIPTION` | `A blog managed by AI via MCP` | Subtitle on the home page |
 | `BLOG_BASE_URL` | `http://localhost:3000` | Base URL for RSS feed links |
+| `POSTS_PATH` | `./data/posts` | Host path for blog post storage (bind mount) |
 | `WEB_PORT` | `3000` | Public blog port |
 | `MCP_PORT` | `3001` | MCP server port |
+
+## Persistence
+
+Posts are stored as plain `.md` files in a **bind-mounted host directory** (`./data/posts` by default). This means:
+
+- Posts survive `docker compose down`, rebuilds, and image updates
+- Files are directly visible and editable on the host filesystem
+- Easy to back up — just copy/rsync the directory, or point `POSTS_PATH` at a location that's already backed up
+- Safe from accidental `docker compose down -v` (which destroys named volumes)
+
+To change the storage location, set `POSTS_PATH` in your `.env`:
+
+```bash
+POSTS_PATH=/mnt/persistent-storage/blog-posts
+```
 
 ## Architecture
 
@@ -110,7 +126,7 @@ The body of the post goes here. Full **markdown** support.
                                      ┌───────▼───────┐
                                      │  /data/posts/  │
                                      │  *.md files    │
-                                     │  (Docker vol)  │
+                                     │  (bind mount)  │
                                      └───────────────┘
 ```
 

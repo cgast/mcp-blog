@@ -5,7 +5,7 @@ services:
       - "${WEB_PORT:-3000}:3000"
       - "${MCP_PORT:-3001}:3001"
     volumes:
-      - blog-posts:/data/posts
+      - ${POSTS_PATH:-./data/posts}:/data/posts
     environment:
       - BLOG_TITLE=${BLOG_TITLE:-MCP Blog}
       - BLOG_DESCRIPTION=${BLOG_DESCRIPTION:-A blog managed by AI via MCP}
@@ -15,6 +15,3 @@ services:
       - WEB_PORT=3000
       - MCP_PORT=3001
     restart: unless-stopped
-
-volumes:
-  blog-posts:

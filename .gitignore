@@ -1,3 +1,6 @@
+# Runtime blog data (bind-mounted posts)
+data/
+
 # Logs
 logs
 *.log
