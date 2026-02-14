@@ -14,6 +14,11 @@ export function createWebApp(): express.Express {
   const blogDescription =
     process.env.BLOG_DESCRIPTION || "A blog managed by AI via MCP";
 
+  // Health check (used by Coolify / Docker)
+  app.get("/health", (_req, res) => {
+    res.json({ status: "ok" });
+  });
+
   // Static files
   app.use(
     "/static",
