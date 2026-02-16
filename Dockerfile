@@ -22,7 +22,7 @@ ENV POSTS_DIR=/data/posts
 ENV WEB_PORT=3000
 ENV MCP_PORT=3001
 
-EXPOSE 3000
+EXPOSE 3000 3001
 
 HEALTHCHECK --interval=10s --timeout=5s --start-period=15s --retries=3 \
   CMD wget -qO- http://localhost:3000/health || exit 1

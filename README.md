@@ -137,16 +137,6 @@ npm install
 npm run dev    # starts both servers with hot-reload via tsx
 ```
 
-To run locally with Docker (with host port bindings):
-
-```bash
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
-```
-
-> **Note:** `docker-compose.dev.yml` adds host port mappings (3000 and 3001).
-> It is intentionally **not** named `docker-compose.override.yml` so that
-> Docker Compose won't auto-merge it in production, which would conflict with
-> Traefik / Coolify reverse-proxy routing.
 
 ## Future Roadmap
 

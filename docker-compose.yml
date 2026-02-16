@@ -1,6 +1,9 @@
 services:
   mcp-blog:
     build: .
+    expose:
+      - "3000"
+      - "3001"
     volumes:
       - posts_data:/data/posts
     environment:
