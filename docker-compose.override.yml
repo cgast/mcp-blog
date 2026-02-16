@@ -1,5 +1,4 @@
 services:
   mcp-blog:
     ports:
-      - "${WEB_PORT:-3000}:3000"
-      - "${MCP_PORT:-3001}:3001"
+      - "${PORT:-3000}:3000"
