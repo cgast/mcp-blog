@@ -3,8 +3,10 @@
 A blog managed entirely by an LLM via [MCP](https://modelcontextprotocol.io) (Model Context Protocol).
 
 Deploy with Docker Compose to get:
-- **A public blog website** (port 3000) — clean, minimal, responsive
-- **An MCP server** (port 3001) — connect your LLM to create, edit, publish, and delete posts
+- **A public blog website** — clean, minimal, responsive
+- **An MCP server** at `/mcp` — connect your LLM to create, edit, publish, and delete posts
+
+Everything runs on a single port (default 3000), so it works out of the box with any reverse proxy (Traefik, Coolify, Caddy, nginx).
 
 Posts are stored as markdown files with YAML frontmatter, so the LLM reads and writes the same format a human would.
 
@@ -31,7 +33,7 @@ Point your LLM's MCP client at the server. Example for Claude Desktop / Claude C
   "mcpServers": {
     "blog": {
       "type": "streamable-http",
-      "url": "http://localhost:3001/mcp",
+      "url": "http://localhost:3000/mcp",
       "headers": {
         "Authorization": "Bearer YOUR_MCP_API_TOKEN"
       }
@@ -84,8 +86,7 @@ The body of the post goes here. Full **markdown** support.
 | `BLOG_DESCRIPTION` | `A blog managed by AI via MCP` | Subtitle on the home page |
 | `BLOG_BASE_URL` | `http://localhost:3000` | Base URL for RSS feed links |
 | `POSTS_PATH` | `./data/posts` | Host path for blog post storage (bind mount) |
-| `WEB_PORT` | `3000` | Public blog port |
-| `MCP_PORT` | `3001` | MCP server port |
+| `PORT` | `3000` | Server port |
 
 ## Persistence
 
@@ -106,7 +107,7 @@ POSTS_PATH=/mnt/persistent-storage/blog-posts
 
 ```
 ┌─────────────┐     MCP/HTTP      ┌──────────────────────────────────┐
-│   LLM       │◄────────────────►│  MCP Server (:3001/mcp)          │
+│   LLM       │◄────────────────►│  /mcp endpoint                    │
 │  (Claude,   │   Bearer token    │  - Streamable HTTP transport     │
 │   GPT, ...) │   auth            │  - Blog management tools         │
 └─────────────┘                   └──────────┬───────────────────────┘
@@ -119,8 +120,9 @@ POSTS_PATH=/mnt/persistent-storage/blog-posts
                                              │
 ┌─────────────┐     HTTP           ┌─────────▼──────────────────────┐
 │  Readers    │◄──────────────────►│  Web Server (:3000)            │
-│  (browser)  │                    │  - Renders published posts     │
-└─────────────┘                    │  - RSS feed at /feed.xml       │
+│  (browser)  │                    │  - Blog at /                   │
+└─────────────┘                    │  - MCP at /mcp                 │
+                                   │  - RSS feed at /feed.xml       │
                                    └────────────────────────────────┘
                                              │
                                      ┌───────▼───────┐
@@ -134,9 +136,8 @@ POSTS_PATH=/mnt/persistent-storage/blog-posts
 
 ```bash
 npm install
-npm run dev    # starts both servers with hot-reload via tsx
+npm run dev    # starts server with hot-reload via tsx
 ```
-
 
 ## Future Roadmap
 

@@ -1,33 +1,23 @@
-import express from "express";
 import { randomUUID } from "node:crypto";
+import express from "express";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { createMcpBlogServer } from "./mcp/server.js";
-import { createWebApp } from "./web/server.js";
+import { createWebApp, createNotFoundHandler } from "./web/server.js";
 import { requireAuth } from "./auth.js";
 
-const WEB_PORT = parseInt(process.env.WEB_PORT || "3000", 10);
-const MCP_PORT = parseInt(process.env.MCP_PORT || "3001", 10);
+const PORT = parseInt(process.env.PORT || process.env.WEB_PORT || "3000", 10);
 
-// ── Web server (public blog) ─────────────────────────────────────────────
-const webApp = createWebApp();
-webApp.listen(WEB_PORT, "0.0.0.0", () => {
-  console.log(`Blog web server listening on http://0.0.0.0:${WEB_PORT}`);
-});
+// ── Single Express app serving both blog and MCP ──────────────────────────
+const app = createWebApp();
 
-// ── MCP server (LLM management interface) ────────────────────────────────
-const mcpApp = express();
-mcpApp.use(express.json());
+// MCP routes need JSON body parsing
+app.use("/mcp", express.json());
 
 // Map of active sessions
 const transports = new Map<string, StreamableHTTPServerTransport>();
 
-// Health check
-mcpApp.get("/health", (_req, res) => {
-  res.json({ status: "ok", server: "mcp-blog" });
-});
-
 // Handle MCP POST requests (initialize + tool calls)
-mcpApp.post("/mcp", async (req, res) => {
+app.post("/mcp", async (req, res) => {
   if (!requireAuth(req, res)) return;
 
   const sessionId = req.headers["mcp-session-id"] as string | undefined;
@@ -63,7 +53,7 @@ mcpApp.post("/mcp", async (req, res) => {
 });
 
 // Handle MCP GET requests (SSE streams)
-mcpApp.get("/mcp", async (req, res) => {
+app.get("/mcp", async (req, res) => {
   if (!requireAuth(req, res)) return;
 
   const sessionId = req.headers["mcp-session-id"] as string | undefined;
@@ -77,7 +67,7 @@ mcpApp.get("/mcp", async (req, res) => {
 });
 
 // Handle MCP DELETE requests (session termination)
-mcpApp.delete("/mcp", async (req, res) => {
+app.delete("/mcp", async (req, res) => {
   if (!requireAuth(req, res)) return;
 
   const sessionId = req.headers["mcp-session-id"] as string | undefined;
@@ -90,6 +80,9 @@ mcpApp.delete("/mcp", async (req, res) => {
   await transport.handleRequest(req, res);
 });
 
-mcpApp.listen(MCP_PORT, "0.0.0.0", () => {
-  console.log(`MCP server listening on http://0.0.0.0:${MCP_PORT}/mcp`);
+// 404 fallback (must be after all routes including MCP)
+app.use(createNotFoundHandler());
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Blog + MCP server listening on http://0.0.0.0:${PORT}`);
 });

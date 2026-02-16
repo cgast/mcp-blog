@@ -1,9 +1,6 @@
 services:
   mcp-blog:
     build: .
-    expose:
-      - "3000"
-      - "3001"
     volumes:
       - posts_data:/data/posts
     environment:
@@ -12,8 +9,7 @@ services:
       - BLOG_BASE_URL=${BLOG_BASE_URL:-http://localhost:3000}
       - MCP_API_TOKEN=${MCP_API_TOKEN:-}
       - POSTS_DIR=/data/posts
-      - WEB_PORT=3000
-      - MCP_PORT=3001
+      - PORT=3000
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
       interval: 10s

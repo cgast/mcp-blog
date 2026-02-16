@@ -7,6 +7,13 @@ import { layout, indexPage, postPage, notFoundPage } from "./templates.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+export function createNotFoundHandler(): express.RequestHandler {
+  const blogTitle = process.env.BLOG_TITLE || "MCP Blog";
+  return (_req, res) => {
+    res.status(404).type("html").send(layout(blogTitle, notFoundPage()));
+  };
+}
+
 export function createWebApp(): express.Express {
   const app = express();
 
@@ -95,11 +102,6 @@ ${items}
       console.error("Error generating RSS:", e);
       res.status(500).send("Internal server error");
     }
-  });
-
-  // 404 fallback
-  app.use((_req, res) => {
-    res.status(404).type("html").send(layout(blogTitle, notFoundPage()));
   });
 
   return app;
